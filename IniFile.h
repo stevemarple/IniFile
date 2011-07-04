@@ -25,17 +25,15 @@ public:
   boolean hasSection(const char* section);
   //boolean hasKey(const char* key, const char* section = NULL);
 
-  int getValue(char* buffer, int len, const char* key, \
-	       const char* section = NULL) const; 
-  boolean getValue(boolean& b, const char* key,	const char* section) const;
-  boolean getValue(int& val, const char* key, const char* section) const;
-  boolean getValue(uint16_t& val, const char* key, const char* section) const;
-  boolean getValue(long& val, const char* key,const char* section) const;
+  int getValue(const char* section, const char* key, \
+	       char* buffer, int len) const; 
+  boolean getValue(const char* section, const char* key, boolean& b) const;
+  boolean getValue(const char* section, const char* key, int& val) const;
+  boolean getValue(const char* section, const char* key, uint16_t& val) const;
+  boolean getValue(const char* section, const char* key, long& val) const;
   
-  boolean getIPAddress(IPAddress& ip, const char* key, \
-		   const char* section = NULL) const;
-  boolean getMACAddress(uint8_t mac[6], const char* key, \
-		    const char* section = NULL) const;
+  boolean getIPAddress(const char* section, const char* key, IPAddress& ip) const;
+  boolean getMACAddress(const char* section, const char* key, uint8_t mac[6]) const;
   
 protected:
   void skipWhiteSpace(void) const;

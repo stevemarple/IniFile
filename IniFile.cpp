@@ -56,8 +56,8 @@ boolean IniFile::hasSection(const char* section)
 
 // Return zero or positive values if key is found, if not the negative
 // value indicates why
-int IniFile::getValue(char* buffer, int len, const char* key,
-		      const char* section) const
+int IniFile::getValue(const char* section, const char* key, \
+		      char* buffer, int len) const
 {
   if (!isOpen())
     return fileNotOpen;
@@ -190,12 +190,12 @@ boolean IniFile::findKey(const char* key) const
 
 // For true accept: true, yes, 1
 // For false accept: false, no, 0
-boolean IniFile::getValue(boolean& val, const char* key, \
-			  const char* section) const
+boolean IniFile::getValue(const char* section, const char* key, \
+			  boolean& val) const
 {
   const int len = 16;
   char buffer[len];
-  int i = getValue(buffer, len, key, section);
+  int i = getValue(section, key, buffer, len);
 
   if (i <= 0 || i >= len) {
     // error or length incorrect
@@ -217,12 +217,11 @@ boolean IniFile::getValue(boolean& val, const char* key, \
   return false; // does not match any known strings      
 }
 
-boolean IniFile::getValue(int& val, const char* key, \
-			  const char* section) const
+boolean IniFile::getValue(const char* section, const char* key, int& val) const
 {
   const int len = 16;
   char buffer[len];
-  int i = getValue(buffer, len, key, section);
+  int i = getValue(section, key, buffer, len);
   if (i <= 0 || i >= len)
     return false; // error or length incorrect
   
@@ -230,35 +229,35 @@ boolean IniFile::getValue(int& val, const char* key, \
   return true;
 }
 
-boolean IniFile::getValue(uint16_t& val, const char* key,	\
-			  const char* section) const
+boolean IniFile::getValue(const char* section, const char* key,	\
+			  uint16_t& val) const
 {
   long longval;
-  boolean r = getValue(longval, key, section);
+  boolean r = getValue(section, key, longval);
   val = uint16_t(longval);
   return r;
 }
 
-boolean IniFile::getValue(long& val, const char* key, \
-			  const char* section) const
+boolean IniFile::getValue(const char* section, const char* key, long& val) const
 {
   const int len = 16;
   char buffer[len];
-  int i = getValue(buffer, len, key, section);
   long origVal = val;
-  if (i <= 0 || i >= len)     
+  int i = getValue(section, key, buffer, len);
+  if (i <= 0 || i >= len) {
+    val = origVal;
     return false; // error or length incorrect
-  
+  }
   val = atol(buffer);
   return true;
 }
 
-boolean IniFile::getIPAddress(IPAddress& ip, const char* key, \
-			      const char* section) const
+boolean IniFile::getIPAddress(const char* section, const char* key, \
+			      IPAddress& ip) const
 {
   const int len = 16; // enough for 4 * 3 digits, 3 dots and a null character
   char buffer[len];
-  int i = getValue(buffer, len, key, section);
+  int i = getValue(section, key, buffer, len);
 
   ip = IPAddress(0, 0, 0, 0);
   if (i <= 0 || i >= len) {
@@ -287,14 +286,14 @@ boolean IniFile::getIPAddress(IPAddress& ip, const char* key, \
   return true;
 }
 
-boolean IniFile::getMACAddress(uint8_t mac[6], const char* key, \
-			   const char* section) const
+boolean IniFile::getMACAddress(const char* section, const char* key, \
+			       uint8_t mac[6]) const
 {
   const int len = 18; // enough for 6 * 2 hex digits, 5 : or - and a null char
   char buffer[len];
 
   memset(mac, 0, 6);
-  int i = getValue(buffer, len, key, section);
+  int i = getValue(section, key, buffer, len);
   if (i <= 0 || i >= len) {
     // error or length incorrect
     return false;
