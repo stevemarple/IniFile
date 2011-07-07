@@ -40,7 +40,7 @@ protected:
   void skipComments(void) const;
   void skipToEndOfLine(void) const;
   boolean findSection(const char* section) const;
-  boolean findKey(const char* key) const;
+  boolean findKey(const char* key, const char* section) const;
 
 private:
   uint8_t _mode;

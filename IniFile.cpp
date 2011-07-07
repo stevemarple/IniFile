@@ -66,7 +66,7 @@ int IniFile::getValue(const char* section, const char* key, \
   if (section != NULL && findSection(section) == false)
     return sectionNotFound;
 
-  if (findKey(key) == false)
+  if (findKey(key, section) == false)
     return keyNotFound;
 
   skipWhiteSpace(); // skip leading WS
@@ -149,7 +149,7 @@ boolean IniFile::findSection(const char* section) const
 }
 
 // Assumes starting from start of line
-boolean IniFile::findKey(const char* key) const
+boolean IniFile::findKey(const char* key, const char* section) const
 {
   int c;
 
@@ -161,6 +161,10 @@ boolean IniFile::findKey(const char* key) const
     skipComments();
     skipWhiteSpace();
 
+    // If section is defined and this lines starts a new section then stop
+    if (section && char(_file.peek()) == '[')
+      return false; 
+    
     const char* k = key;
     //while (_file.available() && *k != '\0' && *k == _file.read())
     //       ++k;
