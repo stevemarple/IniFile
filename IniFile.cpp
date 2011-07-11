@@ -1,53 +1,54 @@
 #include <IniFile.h>
 
-IniFile::IniFile(void)
-{
-  _mode = FILE_READ;
-  _isOpen = false;
-}
+#include <string.h>
 
-IniFile::IniFile(SDClass& SD, char* filename, uint8_t mode)
+const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
+
+IniFile::IniFile(const char* filename, uint8_t mode)
 {
+  if (strlen(filename) <= maxFilenameLen)
+    strcpy(_filename, filename);
   _mode = mode;
-  _file = SD.open(filename, mode);
-  _isOpen = (_file ? true : false); 
 }
 
 IniFile::~IniFile()
 {
-  //if (_isOpen)
+  //if (_file)
   //  _file.close();
 }
 
-boolean IniFile::open(SDClass& SD, char* filename, uint8_t mode)
+boolean IniFile::open(void)
 {
-  close();
-  _mode = mode;
-  _file = SD.open(filename, mode);
-  _isOpen = (_file ? true : false); 
-  return _isOpen;
+  if (!_file) 
+    _file = SD.open(_filename, _mode);
+  return isOpen();
 }
 
 void IniFile::close(void)
 {
-  if (_isOpen)
+  if (_file)
     _file.close();
-  _isOpen = false;
 }
+
 
 boolean IniFile::isOpen(void) const
 {
-  return _isOpen;
+  return (_file == true);
 }
 
-uint8_t IniFile::mode(void) const
+uint8_t IniFile::getMode(void) const
 {
   return _mode;
 }
 
+const char* IniFile::getFilename(void) const
+{
+  return _filename;
+}
+
 boolean IniFile::hasSection(const char* section)
 {
-  if (!isOpen())
+  if (!_file)
     return false;
   
   _file.seek(0); // rewind
@@ -59,7 +60,7 @@ boolean IniFile::hasSection(const char* section)
 int IniFile::getValue(const char* section, const char* key, \
 		      char* buffer, int len) const
 {
-  if (!isOpen())
+  if (!_file)
     return fileNotOpen;
 
   _file.seek(0); // rewind
