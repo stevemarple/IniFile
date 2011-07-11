@@ -8,13 +8,16 @@
 #include "SD.h"
 #include "Ethernet.h"
 
+class IniFileState;
+
 class IniFile {
 public:
   enum returnValues {
-    keyNotFound = -1,
-    sectionNotFound = -2,
-    fileNotOpen = -3,
-    fileReadOnly = -4
+    errorFileNotOpen = -1,
+    errorBufferTooShort = -2,
+    errorSeekError = -3,
+    errorSectionNotFound = -4,
+    errorKeyNotFound = -5,
   };
 
   static const uint8_t maxFilenameLen;
@@ -40,12 +43,21 @@ public:
   
   boolean getIPAddress(const char* section, const char* key, IPAddress& ip) const;
   boolean getMACAddress(const char* section, const char* key, uint8_t mac[6]) const;
+
+  // Utility function to read a line from a file, make available to all
+  static int readLine(File &file, char *buffer, int len, uint32_t &pos);
+  static boolean isCommentChar(char c);
+  static char* skipWhiteSpace(char* str);
+  static void removeTrailingWhiteSpace(char* str);
   
 protected:
   void skipWhiteSpace(void) const;
   void skipComments(void) const;
   void skipToEndOfLine(void) const;
   boolean findSection(const char* section) const;
+  int findSection(const char* section, char* buffer, int len,	\
+		  IniFileState &state);
+
   boolean findKey(const char* key, const char* section) const;
 
 private:
@@ -65,8 +77,8 @@ private:
 	funcFindKey,
   };
 	
-  uint32_t _readLinePosition;
-  uint8_t _getValueState;
+  uint32_t readLinePosition;
+  uint8_t getValueState;
 
   friend class IniFile;
 };

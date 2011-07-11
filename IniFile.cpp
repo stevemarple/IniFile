@@ -61,14 +61,14 @@ int IniFile::getValue(const char* section, const char* key, \
 		      char* buffer, int len) const
 {
   if (!_file)
-    return fileNotOpen;
+    return errorFileNotOpen;
 
   _file.seek(0); // rewind
   if (section != NULL && findSection(section) == false)
-    return sectionNotFound;
+    return errorSectionNotFound;
 
   if (findKey(key, section) == false)
-    return keyNotFound;
+    return errorKeyNotFound;
 
   skipWhiteSpace(); // skip leading WS
   int i = 0;
@@ -148,6 +148,40 @@ boolean IniFile::findSection(const char* section) const
   }
   return false;
 }
+
+int IniFile::findSection(const char* section, char* buffer, int len, \
+			 IniFileState &state)
+{
+  if (section == NULL)
+    return errorSectionNotFound;
+
+  int done = IniFile::readLine(_file, buffer, len, state.readLinePosition);
+  if (done < 0)
+    return done;
+
+  char *cp = skipWhiteSpace(buffer);
+  if (isCommentChar(*cp))
+    return (done ? errorSectionNotFound : 0);
+
+  if (*cp == '[') {
+    // Start of section
+    ++cp;
+    cp = skipWhiteSpace(cp);
+    char *ep = strrchr(cp, ']');
+    if (ep != NULL) {
+      *ep = '\0'; // make ] be end of string
+      removeTrailingWhiteSpace(cp);
+      if (strcmp(cp, section) == 0)
+	return 1;
+    }
+  }
+  
+  // Not a valid section line
+  return (done ? errorSectionNotFound : 0);
+
+}
+
+
 
 // Assumes starting from start of line
 boolean IniFile::findKey(const char* key, const char* section) const
@@ -331,3 +365,72 @@ boolean IniFile::getMACAddress(const char* section, const char* key, \
   return true;
 }
 
+int IniFile::readLine(File &file, char *buffer, int len, uint32_t &pos)
+{
+  if (!file)
+    return errorFileNotOpen;
+ 
+  if (len < 3) 
+    return errorBufferTooShort;
+
+  if (!file.seek(pos))
+    return errorSeekError;
+
+  int bytesRead = file.read(buffer, len);
+  if (!bytesRead) {
+    buffer[0] = '\0';
+    return 1; // done
+  }
+  
+  for (int i = 0; i < bytesRead && i < len-1; ++i) {
+    // Test for '\n' with optional '\r' too
+    // if (endOfLineTest(buffer, len, i, '\n', '\r')
+	
+    if (buffer[i] == '\n' || buffer[i] == '\r') {
+      char match = buffer[i];
+      char otherNewline = (match == '\n' ? '\r' : '\n'); 
+      // end of line, discard any trailing character of the other sort
+      // of newline
+      buffer[i] = '\0';
+      
+      if (buffer[i+1] == otherNewline)
+	++i;
+      pos += (i + 1); // skip past newline(s)
+      return (i+1 == bytesRead && !file.available());
+    }
+  }
+  if (!file.available()) {
+    // end of file without a newline
+    buffer[bytesRead] = '\0';
+    return 1; //done
+  }
+  
+  buffer[len-1] = '\0'; // terminate the string
+  return errorBufferTooShort;
+}
+
+boolean IniFile::isCommentChar(char c)
+{
+  return (c == ';' || c == '#');
+}
+
+char* IniFile::skipWhiteSpace(char* str)
+{
+  char *cp = str;
+  while (isspace(*cp))
+    ++cp;
+  return cp;
+}
+
+void IniFile::removeTrailingWhiteSpace(char* str)
+{
+  char *cp = str + strlen(str);
+  while (cp >= str && isspace(*cp))
+    *cp-- = '\0';
+}
+
+IniFileState::IniFileState()
+{
+  readLinePosition = 0;
+  getValueState = funcUnset;
+}
