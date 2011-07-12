@@ -18,6 +18,7 @@ public:
     errorSeekError = -3,
     errorSectionNotFound = -4,
     errorKeyNotFound = -5,
+    errorUnknownError = -6,
   };
 
   static const uint8_t maxFilenameLen;
@@ -32,10 +33,18 @@ public:
   boolean isOpen(void) const;
   uint8_t getMode(void) const;
   const char* getFilename(void) const;
+
+  boolean validate(char* buffer, int len) const;
   
-  boolean hasSection(const char* section);
-  int getValue(const char* section, const char* key, \
-	       char* buffer, int len) const; 
+  // Get value from the file, but split into many short tasks. Return
+  // value: negative is and error, zero means continue, 1 means stop
+  int8_t getValue(const char* section, const char* key,
+		  char* buffer, int len, IniFileState &state) const;
+
+  // Get value, as one big task.
+  int8_t getValue(const char* section, const char* key,
+		  char* buffer, int len) const; 
+  
   boolean getValue(const char* section, const char* key, boolean& b) const;
   boolean getValue(const char* section, const char* key, int& val) const;
   boolean getValue(const char* section, const char* key, uint16_t& val) const;
@@ -45,25 +54,21 @@ public:
   boolean getMACAddress(const char* section, const char* key, uint8_t mac[6]) const;
 
   // Utility function to read a line from a file, make available to all
-  static int readLine(File &file, char *buffer, int len, uint32_t &pos);
+  static int8_t readLine(File &file, char *buffer, int len, uint32_t &pos);
   static boolean isCommentChar(char c);
   static char* skipWhiteSpace(char* str);
   static void removeTrailingWhiteSpace(char* str);
   
-protected:
-  void skipWhiteSpace(void) const;
-  void skipComments(void) const;
-  void skipToEndOfLine(void) const;
-  boolean findSection(const char* section) const;
-  int findSection(const char* section, char* buffer, int len,	\
-		  IniFileState &state);
+  protected:
+  int8_t findSection(const char* section, char* buffer, int len,	
+		     IniFileState &state) const;
+  int8_t findKey(const char* section, const char* key, char* buffer, int len, 	
+		 char** keyptr, IniFileState &state) const;
 
-  boolean findKey(const char* key, const char* section) const;
 
 private:
   char _filename[INI_FILE_MAX_FILENAME_LEN];
   uint8_t _mode;
-  //boolean _isOpen;
   mutable File _file;
 };
 

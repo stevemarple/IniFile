@@ -30,7 +30,6 @@ void IniFile::close(void)
     _file.close();
 }
 
-
 boolean IniFile::isOpen(void) const
 {
   return (_file == true);
@@ -46,190 +45,72 @@ const char* IniFile::getFilename(void) const
   return _filename;
 }
 
-boolean IniFile::hasSection(const char* section)
+boolean IniFile::validate(char* buffer, int len) const
 {
-  if (!_file)
-    return false;
-  
-  _file.seek(0); // rewind
-  return findSection(section);
+  uint32_t pos = 0;
+  int8_t done;
+  while ((done = readLine(_file, buffer, len, pos)) == 0)
+    ;
+  return (done == 1 ? true : false);
 }
 
-// Return zero or positive values if key is found, if not the negative
-// value indicates why
-int IniFile::getValue(const char* section, const char* key, \
-		      char* buffer, int len) const
+int8_t IniFile::getValue(const char* section, const char* key,
+			 char* buffer, int len, IniFileState &state) const
 {
+  int8_t done = 0;
   if (!_file)
     return errorFileNotOpen;
-
-  _file.seek(0); // rewind
-  if (section != NULL && findSection(section) == false)
-    return errorSectionNotFound;
-
-  if (findKey(key, section) == false)
-    return errorKeyNotFound;
-
-  skipWhiteSpace(); // skip leading WS
-  int i = 0;
-  int lastNonWS = -1;
-  while (_file.available()) {
-    char c = _file.read();
-    if (c == '\r' || c == '\n')
-      break; // end of line
-
-    if (!isspace(c))
-      lastNonWS = i; // keep track of last non-whitespace char found
-
-    if (i < len)
-      buffer[i] = c; // copy if buffer large enough
-    ++i;
-  }
-
-  if (len) {
-    // terminate the string (only if buffer has space!)
-    if (lastNonWS + 1 > len)
-      // value is longer than the buffer
-      buffer[len-1] = '\0';
-    else
-      buffer[lastNonWS + 1] = '\0';
-  }
-  return lastNonWS + 1; // return the length of the string *found*
-}
-
-extern void IniFile::skipWhiteSpace(void) const
-{
-  while (_file.available() && isspace(_file.peek()))
-    _file.read();
-}
-
-void IniFile::skipComments(void) const
-{
-  char c;
-  while (_file.available() && ((c = _file.peek()) == '#' || c == ';'))
-    skipToEndOfLine();
-}
-
-void IniFile::skipToEndOfLine(void) const
-{
-  char c;
-  while (_file.available() && (c = _file.peek()) != '\r' && c != '\n') 
-    _file.read();
   
-  while (_file.available() && ((c = _file.peek()) == '\r' || c == '\n')) 
-    _file.read();
-}
-  
-// Assumes starting from start of line
-boolean IniFile::findSection(const char* section) const
-{
-  int c;
-  if (section == NULL)
-    return false;
-  
-  while (_file.available()) {
-    skipComments();
-    skipWhiteSpace();
-
-    c = _file.read();
-    if (c == '[') {
-      // At start of a section
-      const char* s = section;
-      while (c != -1 && *s != '\0' && *s == _file.read())
-	++s;
-      if (*s == '\0' && _file.read() == ']') {
-	// found the section
-	skipToEndOfLine();
-	return true;
-      }
-    }
-
-    skipToEndOfLine();
-  }
-  return false;
-}
-
-int IniFile::findSection(const char* section, char* buffer, int len, \
-			 IniFileState &state)
-{
-  if (section == NULL)
-    return errorSectionNotFound;
-
-  int done = IniFile::readLine(_file, buffer, len, state.readLinePosition);
-  if (done < 0)
-    return done;
-
-  char *cp = skipWhiteSpace(buffer);
-  if (isCommentChar(*cp))
-    return (done ? errorSectionNotFound : 0);
-
-  if (*cp == '[') {
-    // Start of section
-    ++cp;
-    cp = skipWhiteSpace(cp);
-    char *ep = strrchr(cp, ']');
-    if (ep != NULL) {
-      *ep = '\0'; // make ] be end of string
-      removeTrailingWhiteSpace(cp);
-      if (strcmp(cp, section) == 0)
-	return 1;
-    }
-  }
-  
-  // Not a valid section line
-  return (done ? errorSectionNotFound : 0);
-
-}
-
-
-
-// Assumes starting from start of line
-boolean IniFile::findKey(const char* key, const char* section) const
-{
-  int c;
-
-  if (key == NULL || *key == '\0') {
-    return false;
-  }
-
-  while (_file.available()) {
-    skipComments();
-    skipWhiteSpace();
-
-    // If section is defined and this lines starts a new section then stop
-    if (section && char(_file.peek()) == '[')
-      return false; 
+  switch (state.getValueState) {
+  case IniFileState::funcUnset:
+    state.getValueState = (section == NULL ? IniFileState::funcFindKey
+			   : IniFileState::funcFindSection);
+    state.readLinePosition = 0;
+    break;
     
-    const char* k = key;
-    //while (_file.available() && *k != '\0' && *k == _file.read())
-    //       ++k;
-    while (_file.available() && *k != '\0' &&
-	   ((c = _file.read()) == *k  || (isspace(*k) && isspace(c)))) {
-      ++k;
-      if (isspace(c)) {
-	skipWhiteSpace(); // skip any extra whitespace in the file
-	while (isspace(*k)) // skip any extra whitespace in key 
-	  ++k;
-      }
+  case IniFileState::funcFindSection:
+    if ((done = findSection(section, buffer, len, state)) == 1) {
+      done = 0;
+      state.getValueState = IniFileState::funcFindKey;
     }
-        
-    if (*k == '\0' && (isspace(c = _file.peek()) || c == '=')) {
-      skipWhiteSpace();
-      if (_file.available() && _file.read() != '=') {
-	// supplied key is only a partial match to the key in the file
-	skipToEndOfLine();
-      }
-      return true; // still have any leading WS in front of value
+    break;
+    
+  case IniFileState::funcFindKey:
+    char *cp;
+    if ((done = findKey(section, key, buffer, len, &cp, state)) == 1) {
+      // Found key line in correct section
+      cp = skipWhiteSpace(cp);
+      removeTrailingWhiteSpace(cp);
+
+      // Copy from cp to buffer, but the strings overlap so strcpy is out
+      while (*cp != '\0')
+	*buffer++ = *cp++;
+      *buffer = '\0';
     }
-    skipToEndOfLine();
+    break;
+    
+  default:
+    // How did this happen?
+    done = errorUnknownError;
+    break;
   }
-  return false;
+  
+  return done;
 }
 
+int8_t IniFile::getValue(const char* section, const char* key,
+			 char* buffer, int len) const
+{
+  IniFileState state;
+  int8_t done;
+  while ((done = getValue(section, key, buffer, len, state)) == 0)
+    ;
+  return done;
+}
 
 // For true accept: true, yes, 1
-// For false accept: false, no, 0
-boolean IniFile::getValue(const char* section, const char* key, \
+ // For false accept: false, no, 0
+boolean IniFile::getValue(const char* section, const char* key, 
 			  boolean& val) const
 {
   const int len = 16;
@@ -291,7 +172,7 @@ boolean IniFile::getValue(const char* section, const char* key, long& val) const
   return true;
 }
 
-boolean IniFile::getIPAddress(const char* section, const char* key, \
+boolean IniFile::getIPAddress(const char* section, const char* key, 
 			      IPAddress& ip) const
 {
   const int len = 16; // enough for 4 * 3 digits, 3 dots and a null character
@@ -325,7 +206,7 @@ boolean IniFile::getIPAddress(const char* section, const char* key, \
   return true;
 }
 
-boolean IniFile::getMACAddress(const char* section, const char* key, \
+boolean IniFile::getMACAddress(const char* section, const char* key, 
 			       uint8_t mac[6]) const
 {
   const int len = 18; // enough for 6 * 2 hex digits, 5 : or - and a null char
@@ -365,7 +246,7 @@ boolean IniFile::getMACAddress(const char* section, const char* key, \
   return true;
 }
 
-int IniFile::readLine(File &file, char *buffer, int len, uint32_t &pos)
+int8_t IniFile::readLine(File &file, char *buffer, int len, uint32_t &pos)
 {
   if (!file)
     return errorFileNotOpen;
@@ -424,9 +305,73 @@ char* IniFile::skipWhiteSpace(char* str)
 
 void IniFile::removeTrailingWhiteSpace(char* str)
 {
-  char *cp = str + strlen(str);
+  char *cp = str + strlen(str) - 1;
   while (cp >= str && isspace(*cp))
     *cp-- = '\0';
+}
+
+int8_t IniFile::findSection(const char* section, char* buffer, int len, 
+			    IniFileState &state) const
+{
+  if (section == NULL)
+    return errorSectionNotFound;
+
+  int8_t done = IniFile::readLine(_file, buffer, len, state.readLinePosition);
+  if (done < 0)
+    return done;
+
+  char *cp = skipWhiteSpace(buffer);
+  if (isCommentChar(*cp))
+    return (done ? errorSectionNotFound : 0);
+
+  if (*cp == '[') {
+    // Start of section
+    ++cp;
+    cp = skipWhiteSpace(cp);
+    char *ep = strchr(cp, ']');
+    if (ep != NULL) {
+      *ep = '\0'; // make ] be end of string
+      removeTrailingWhiteSpace(cp);
+      if (strcmp(cp, section) == 0)
+	return 1;
+    }
+  }
+  
+  // Not a valid section line
+  return (done ? errorSectionNotFound : 0);
+}
+
+// From the current file location look for the matching key
+int8_t IniFile::findKey(const char* section, const char* key,
+			char* buffer, int len, char** keyptr,
+			IniFileState &state) const
+{
+  if (key == NULL || *key == '\0') 
+    return errorKeyNotFound;
+
+  int8_t done = IniFile::readLine(_file, buffer, len, state.readLinePosition);
+  if (done < 0)
+    return done;
+  
+  char *cp = skipWhiteSpace(buffer);
+  if (isCommentChar(*cp))
+    return (done ? errorKeyNotFound : 0);
+
+  if (section && *cp == '[')
+    // Stat of a new section
+    return errorKeyNotFound;
+   
+  // Find '='
+  char *ep = strchr(cp, '=');
+  if (ep != NULL) {
+    *ep = '\0'; // make = be the end of string
+    removeTrailingWhiteSpace(cp);
+    if (strcmp(cp, key) == 0) {
+      *keyptr = ep + 1;
+      return 1;
+    }
+  }
+  return (done ? errorKeyNotFound : 0);
 }
 
 IniFileState::IniFileState()
