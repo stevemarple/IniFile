@@ -9,8 +9,7 @@ written inside square brackets. If you don't wish to use sections then
 pass a NULL pointer for the section name. Under each section are a set
 of key-value pairs, separated by an equals sign. Spaces around keys
 and values are ignored, but extra spaces inside the key are
-significant, ie "hostsallow", "hosts allow" and "hosts allow" are not
-equivalent. Whitespace inside the value string is preserved; if
+significant. Whitespace inside the value string is preserved; if
 leading or trailing whitespace is important you must quote the value
 string inside the ini file, and you must strip out the quotes
 yourself. If multiple entries for the same key exist inside the
