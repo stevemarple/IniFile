@@ -7,17 +7,18 @@ thus the user remains in charge of memory usage.
 The ini file is separated into sections, where the section names are
 written inside square brackets. If you don't wish to use sections then
 pass a NULL pointer for the section name. Under each section are a set
-of key-value pairs, separated by an equals sign. The formatting can be
-slopppy. Spaces around keys and values are ignored, as are extra
-spaces inside the key, ie "hosts allow" and "hosts allow" are
-equivalent, but "hostsallow" is not. Extra whitespace inside the value
-string is preserved; if leading or trailing whitespace is important
-you must quote the value string inside the ini file, and you must
-strip out the quotes yourself. If multiple entries for the same key
-exist inside the selected section (if using) then only the first value
-is returned. If a section is defined more than once only the first is
-used. The ini file can contain comments, which begin with a semicolon
-(;) or hash (#).
+of key-value pairs, separated by an equals sign. Spaces around keys
+and values are ignored, but extra spaces inside the key are
+significant, ie "hostsallow", "hosts allow" and "hosts allow" are not
+equivalent. Whitespace inside the value string is preserved; if
+leading or trailing whitespace is important you must quote the value
+string inside the ini file, and you must strip out the quotes
+yourself. If multiple entries for the same key exist inside the
+selected section (if using) then only the first value is returned. If
+a section is defined more than once only the first is used. The ini
+file can contain comments, which begin with a semicolon (;) or hash
+(#). The user-supplied buffer must be large enough to accomodate the
+longest line in the file.
 
 Example file format:
 
@@ -39,9 +40,9 @@ hosts allow = example.com
 mac = ee:ee:ee:ee:ee:ee
 subnet mask=255.255.255.0
 
-; Extra whitespace in keys and around the key and value is permitted
+; Extra whitespace around the key and value is permitted
 ; (and ignored)
-  hosts  allow =    sloppy.example.com  
+  hosts allow =    sloppy.example.com  
 
 [misc]
 
