@@ -45,13 +45,19 @@ public:
   int8_t getValue(const char* section, const char* key,
 		  char* buffer, int len) const; 
   
-  boolean getValue(const char* section, const char* key, boolean& b) const;
-  boolean getValue(const char* section, const char* key, int& val) const;
-  boolean getValue(const char* section, const char* key, uint16_t& val) const;
-  boolean getValue(const char* section, const char* key, long& val) const;
+  boolean getValue(const char* section, const char* key,
+		   char* buffer, int len, boolean& b) const;
+  boolean getValue(const char* section, const char* key,
+		   char* buffer, int len, int& val) const;
+  boolean getValue(const char* section, const char* key,
+		   char* buffer, int len, uint16_t& val) const;
+  boolean getValue(const char* section, const char* key,
+		   char* buffer, int len, long& val) const;
   
-  boolean getIPAddress(const char* section, const char* key, IPAddress& ip) const;
-  boolean getMACAddress(const char* section, const char* key, uint8_t mac[6]) const;
+  boolean getIPAddress(const char* section, const char* key,
+		       char* buffer, int len, IPAddress& ip) const;
+  boolean getMACAddress(const char* section, const char* key,
+			char* buffer, int len, uint8_t mac[6]) const;
 
   // Utility function to read a line from a file, make available to all
   static int8_t readLine(File &file, char *buffer, int len, uint32_t &pos);
