@@ -162,6 +162,40 @@ boolean IniFile::getValue(const char* section, const char* key,
 }
 
 boolean IniFile::getIPAddress(const char* section, const char* key,
+			      char* buffer, int len, uint8_t* ip) const
+{
+  // Need 16 chars minimum: 4 * 3 digits, 3 dots and a null character
+  if (len < 16)
+    return false;
+
+  if (getValue(section, key, buffer, len) < 0) 
+    return false; // error
+
+  int i = 0;
+  char* cp = buffer;
+  ip[0] = ip[1] = ip[2] = ip[3] = 0;
+  while (*cp != '\0' && i < 4) {
+    if (*cp == '.') {
+      ++i;
+      ++cp;
+      continue;
+    }
+    if (isdigit(*cp)) {
+      ip[i] *= 10;
+      ip[i] += (*cp - '0');
+    }
+    else {
+      ip[0] = ip[1] = ip[2] = ip[3] = 0;
+      return false;
+    }
+    ++cp;
+  }
+  return true;
+}
+
+
+#if defined(ARDUINO) && ARDUINO >= 100
+boolean IniFile::getIPAddress(const char* section, const char* key,
 			      char* buffer, int len, IPAddress& ip) const
 {
   // Need 16 chars minimum: 4 * 3 digits, 3 dots and a null character
@@ -192,6 +226,7 @@ boolean IniFile::getIPAddress(const char* section, const char* key,
   }
   return true;
 }
+#endif
 
 boolean IniFile::getMACAddress(const char* section, const char* key,
 			       char* buffer, int len, uint8_t mac[6]) const

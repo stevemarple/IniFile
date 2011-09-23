@@ -53,9 +53,15 @@ public:
 		   char* buffer, int len, uint16_t& val) const;
   boolean getValue(const char* section, const char* key,
 		   char* buffer, int len, long& val) const;
+
+  boolean getIPAddress(const char* section, const char* key,
+		       char* buffer, int len, uint8_t* ip) const;
   
+#if defined(ARDUINO) && ARDUINO >= 100
   boolean getIPAddress(const char* section, const char* key,
 		       char* buffer, int len, IPAddress& ip) const;
+#endif
+
   boolean getMACAddress(const char* section, const char* key,
 			char* buffer, int len, uint8_t mac[6]) const;
 
