@@ -23,9 +23,10 @@ void setup()
   const int macLen = 18;
   char mac[macLen];
   int i;
-  
+
+  const char *filename = "/net.ini";
   Serial.begin(9600);
-  IniFile ini("/etc/net.ini");
+  IniFile ini(filename);
   if (ini.isOpen()) {
     Serial.println("Ini file exists");
     if (ini.getValue("mac", "network", mac, macLen)) {
@@ -35,18 +36,11 @@ void setup()
     }
     else
       Serial.println("Could not read mac from network section");
-
-
-    
-    if (i >= macLen)
-      Serial.println("Buffer too small to hold value");
-    else {
-      Serial.print("Mac address is ");
-      Serial.println(mac);
-    }
   }
   else {
-    Serial.print("Ini file does not exist");
+    Serial.print("Ini file ");
+    Serial.print(filename);
+    Serial.println(" does not exist");
   }
 }
 
