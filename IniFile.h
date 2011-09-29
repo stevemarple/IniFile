@@ -37,7 +37,7 @@ public:
   boolean validate(char* buffer, int len) const;
   
   // Get value from the file, but split into many short tasks. Return
-  // value: negative is and error, zero means continue, 1 means stop
+  // value: negative is an error, zero means continue, 1 means stop
   int8_t getValue(const char* section, const char* key,
 		  char* buffer, int len, IniFileState &state) const;
 
