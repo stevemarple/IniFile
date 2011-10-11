@@ -4,11 +4,13 @@
 
 const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
 
-IniFile::IniFile(const char* filename, uint8_t mode)
+IniFile::IniFile(const char* filename, uint8_t mode,
+		 boolean caseSensitive)
 {
   if (strlen(filename) <= maxFilenameLen)
     strcpy(_filename, filename);
   _mode = mode;
+  _caseSensitive = caseSensitive;
 }
 
 IniFile::~IniFile()
@@ -353,8 +355,14 @@ int8_t IniFile::findSection(const char* section, char* buffer, int len,
     if (ep != NULL) {
       *ep = '\0'; // make ] be end of string
       removeTrailingWhiteSpace(cp);
-      if (strcmp(cp, section) == 0)
-	return 1;
+      if (_caseSensitive) {
+	if (strcmp(cp, section) == 0)
+	  return 1;
+      }
+      else {
+	if (strcasecmp(cp, section) == 0)
+	  return 1;
+      }
     }
   }
   
@@ -387,12 +395,31 @@ int8_t IniFile::findKey(const char* section, const char* key,
   if (ep != NULL) {
     *ep = '\0'; // make = be the end of string
     removeTrailingWhiteSpace(cp);
-    if (strcmp(cp, key) == 0) {
-      *keyptr = ep + 1;
-      return 1;
+    if (_caseSensitive) {
+      if (strcmp(cp, key) == 0) {
+	*keyptr = ep + 1;
+	return 1;
+      }
+    }
+    else {
+      if (strcasecmp(cp, key) == 0) {
+	*keyptr = ep + 1;
+	return 1;
+      }
     }
   }
+  
   return (done ? errorKeyNotFound : 0);
+}
+
+boolean IniFile::getCaseSensitive(void) const
+{
+  return _caseSensitive;
+}
+
+void IniFile::setCaseSensitive(boolean cs)
+{
+  _caseSensitive = cs;
 }
 
 IniFileState::IniFileState()

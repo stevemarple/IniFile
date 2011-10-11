@@ -24,7 +24,8 @@ public:
   static const uint8_t maxFilenameLen;
 
   // Create an IniFile object. It isn't opened until open() is called on it.
-  IniFile(const char* filename, uint8_t mode = FILE_READ);
+  IniFile(const char* filename, uint8_t mode = FILE_READ,
+	  boolean caseSensitive = false);
   ~IniFile();
 
   boolean open(void);
@@ -70,6 +71,9 @@ public:
   static boolean isCommentChar(char c);
   static char* skipWhiteSpace(char* str);
   static void removeTrailingWhiteSpace(char* str);
+
+  boolean getCaseSensitive(void) const;
+  void setCaseSensitive(boolean cs);
   
   protected:
   int8_t findSection(const char* section, char* buffer, int len,	
@@ -82,6 +86,7 @@ private:
   char _filename[INI_FILE_MAX_FILENAME_LEN];
   uint8_t _mode;
   mutable File _file;
+  boolean _caseSensitive;
 };
 
 class IniFileState {
