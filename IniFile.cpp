@@ -110,6 +110,19 @@ int8_t IniFile::getValue(const char* section, const char* key,
   return done;
 }
 
+
+boolean IniFile::getValue(const char* section, const char* key,
+			 char* buffer, int len, char *value, int vlen) const
+{
+  if (getValue(section, key, buffer, len) < 0)
+    return false; // error
+  if (strlen(buffer) >= vlen)
+    return false;
+  strcpy(value, buffer);
+  return true;
+}
+
+
 // For true accept: true, yes, 1
  // For false accept: false, no, 0
 boolean IniFile::getValue(const char* section, const char* key, 

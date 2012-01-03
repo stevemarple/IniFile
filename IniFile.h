@@ -45,13 +45,25 @@ public:
   // Get value, as one big task.
   int8_t getValue(const char* section, const char* key,
 		  char* buffer, int len) const; 
-  
+
+  // Get the value as a string, storing the result in a new buffer
+  // (not the working buffer)
+  boolean getValue(const char* section, const char* key,
+		   char* buffer, int len, char *value, int vlen) const;
+
+  // Get a boolean value
   boolean getValue(const char* section, const char* key,
 		   char* buffer, int len, boolean& b) const;
+
+  // Get an integer value
   boolean getValue(const char* section, const char* key,
 		   char* buffer, int len, int& val) const;
+
+  // Get a uint16_t value
   boolean getValue(const char* section, const char* key,
 		   char* buffer, int len, uint16_t& val) const;
+
+  // Get a long value
   boolean getValue(const char* section, const char* key,
 		   char* buffer, int len, long& val) const;
 
