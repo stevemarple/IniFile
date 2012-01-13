@@ -1,0 +1,57 @@
+*** Testing IniFile(char*) ***
+Using file missing.ini
+  File open? false
+    Looking for key "mac"
+      Error: file not open (-1)
+    Looking for key "mac" in section network
+      Error: file not open (-1)
+    Looking for key "mac" in section network2
+      Error: file not open (-1)
+    Looking for key "mac" in section fake
+      Error: file not open (-1)
+    Looking for key "ip"
+      Error: file not open (-1)
+    Looking for key "gateway"
+      Error: file not open (-1)
+    Looking for key "hosts allow" in section network
+      Error: file not open (-1)
+    Looking for key "hosts allow" in section network
+      Error: file not open (-1)
+    Looking for key "hosts allow" in section network2
+      Error: file not open (-1)
+    Looking for key "hosts allow" in section network2
+      Error: file not open (-1)
+    Looking for key "string" in section misc
+      Error: file not open (-1)
+    Looking for key "string2" in section misc
+      Error: file not open (-1)
+----
+Using file test.ini
+  File open? true
+    Looking for key "mac"
+      Value of mac is "01:23:45:67:89:AB"
+    Looking for key "mac" in section network
+      Value of mac is "01:23:45:67:89:AB"
+    Looking for key "mac" in section network2
+      Value of mac is "ee:ee:ee:ee:ee:ee"
+    Looking for key "mac" in section fake
+      Error: section not found (-4)
+    Looking for key "ip"
+      Value of ip is "192.168.1.2"
+    Looking for key "gateway"
+      Value of gateway is "192.168.1.1"
+    Looking for key "hosts allow" in section network
+      Value of hosts allow is "example.com"
+    Looking for key "hosts allow" in section network
+      Value of hosts allow is "example.com"
+    Looking for key "hosts allow" in section network2
+      Value of hosts allow is "sloppy.example.com"
+    Looking for key "hosts allow" in section network2
+      Value of hosts allow is "sloppy.example.com"
+    Looking for key "string" in section misc
+      Value of string is "123456789012345678901234567890123456789"
+      BUFFER TOO SHORT
+    Looking for key "string2" in section misc
+      Value of string2 is "a string with spaces in it"
+----
+Done
