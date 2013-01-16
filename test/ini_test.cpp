@@ -6,23 +6,31 @@ using namespace std;
 
 
 const char noError[] = "no error";
+const char fileNotFound[] = "file not found";
 const char fileNotOpen[] = "file not open";
-const char bufferTooShort[] = "buffer too short";
+const char bufferTooSmall[] = "buffer too small";
 const char seekError[] = "seek error";
 const char sectionNotFound[] = "section not found";
 const char keyNotFound[] = "key not found";
 const char unknownError[] = "unknown error";
+const char unknownErrorValue[] = "unknown error value";
 
-const char* getError(int e)
+const char* getErrorMessage(int e)
 {
   const char *cp = unknownError;
 
   switch (e) {
+  case IniFile::errorNoError:
+    cp = noError;
+    break;
+  case IniFile::errorFileNotFound:
+    cp = fileNotFound;
+    break;
   case IniFile::errorFileNotOpen:
     cp = fileNotOpen;
     break;
-  case IniFile::errorBufferTooShort:
-    cp = bufferTooShort;
+  case IniFile::errorBufferTooSmall:
+    cp = bufferTooSmall;
     break;
   case IniFile::errorSeekError:
     cp = seekError;
@@ -34,8 +42,7 @@ const char* getError(int e)
     cp = keyNotFound; 
     break;
   default:
-    if (e >= 0)
-      cp = noError;
+    cp = unknownErrorValue;
     break;
   };
   return cp;
@@ -45,17 +52,19 @@ void testForKey(IniFile &ini, const char *key, const char *section = NULL)
 {
   cout << "    Looking for key \"" << key << '"';
   if (section)
-    cout << " in section " << section;
+    cout << " in section \"" << section << "\"";
   cout << endl;
 
   const int len = 80;
   char buffer[len];
 
-  int8_t i = ini.getValue(section, key, buffer, len);
-  if (i < 0) {
-    cout << "      Error: " << getError(i) << " (" << int(i) << ")" << endl;
-    if (i == IniFile::errorBufferTooShort)
-      cout << "Buffer too short for line \"" << buffer << "...\"" << endl;
+  bool b = ini.getValue(section, key, buffer, len);
+  if (b == false) {
+    int e = ini.getError();
+    cout << "      Error: " << getErrorMessage(e) << " (" << int(e) << ")"
+	 << endl;
+    if (b == IniFile::errorBufferTooSmall)
+      cout << "Buffer too small for line \"" << buffer << "...\"" << endl;
   }
   else
     cout << "      Value of " << key << " is \"" << buffer << '"' << endl;

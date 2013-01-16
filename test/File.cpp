@@ -49,7 +49,7 @@ void File::close(void)
   _f = NULL;
 }
 
-boolean File::isOpen(void) const
+bool File::isOpen(void) const
 {
   return _f != NULL;
 }
@@ -112,7 +112,7 @@ int File::peek(void)
   return c;
 }
 
-boolean File::seek(int pos)
+bool File::seek(int pos)
 {
   if (_f == NULL)
     return false;

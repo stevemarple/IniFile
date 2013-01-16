@@ -18,9 +18,9 @@ public:
   int read(void *buf, int n);
 
   int peek(void);
-  boolean seek(int pos);
+  bool seek(int pos);
 
-  boolean isOpen(void) const;
+  bool isOpen(void) const;
   operator bool() const;
 
   long size(void);
