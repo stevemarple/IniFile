@@ -81,6 +81,10 @@ public:
   bool getValue(const char* section, const char* key,
 		   char* buffer, size_t len, unsigned long& val) const;
 
+  // Get a float value
+  bool getValue(const char* section, const char* key,
+		   char* buffer, size_t len, float& val) const;
+  
   bool getIPAddress(const char* section, const char* key,
 		       char* buffer, size_t len, uint8_t* ip) const;
   

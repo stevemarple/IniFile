@@ -183,6 +183,27 @@ bool IniFile::getValue(const char* section, const char* key,
   return false; 
 }
 
+
+bool IniFile::getValue(const char* section, const char* key,
+			  char* buffer, size_t len, float & val) const
+{
+  if (getValue(section, key, buffer, len) < 0)
+    return false; // error
+
+  char *endptr;
+  float tmp = strtod(buffer, &endptr);
+  if (endptr == buffer)
+    return false; // no conversion
+  if (*endptr == '\0') {
+    val = tmp;
+    return true; // valid conversion
+  }
+  // buffer has trailing non-numeric characters, and since the buffer
+  // already had whitespace removed discard the entire results
+  return false; 
+}
+
+
 bool IniFile::getIPAddress(const char* section, const char* key,
 			      char* buffer, size_t len, uint8_t* ip) const
 {

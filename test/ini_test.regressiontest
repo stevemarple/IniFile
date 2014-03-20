@@ -25,6 +25,10 @@ Using file missing.ini
       Error: file not open (2)
     Looking for key "string2" in section "misc"
       Error: file not open (2)
+    Looking for key "pi" in section "misc"
+      Error: file not open (2)
+    Could not read "pi" from section "misc" in missing.ini
+      Error: file not open (2)
 ----
 Using file test.ini
   File open? true
@@ -52,5 +56,8 @@ Using file test.ini
       Value of string is "123456789012345678901234567890123456789001234567890"
     Looking for key "string2" in section "misc"
       Value of string2 is "a string with spaces in it"
+    Looking for key "pi" in section "misc"
+      Value of pi is "3.141592653589793"
+    Pi: 3.14159
 ----
 Done

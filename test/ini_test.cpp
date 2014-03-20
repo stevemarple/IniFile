@@ -88,6 +88,21 @@ void runTest(IniFile &ini)
   testForKey(ini, "hosts allow", "network2");
   testForKey(ini, "string", "misc");
   testForKey(ini, "string2", "misc");
+  testForKey(ini, "pi", "misc");
+  float iniPi = 0.0;
+  char buffer[80];
+  if (ini.getValue("misc", "pi", buffer, sizeof(buffer), iniPi)) {
+    cout << "    Pi: " << iniPi << endl;
+    if (iniPi <= 3.1410 || iniPi >= 3.1416)
+      cout << "    Pi out of range" << endl;
+  }
+  else {
+    int e = ini.getError();
+    cout << "    Could not read \"pi\" from section \"misc\" in " << ini.getFilename()
+	 << endl
+	 << "      Error: " << getErrorMessage(e) << " (" << int(e) << ")"
+	 << endl;
+  }
   cout << "----" << endl;
   
 
