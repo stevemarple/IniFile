@@ -115,6 +115,7 @@ public:
 
 
 private:
+  static error_t readUntilNewLine(File &file, char *buffer, size_t len, uint32_t &pos);
   char _filename[INI_FILE_MAX_FILENAME_LEN];
   uint8_t _mode;
   mutable error_t _error;
