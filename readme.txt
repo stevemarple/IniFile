@@ -16,8 +16,10 @@ yourself. If multiple entries for the same key exist inside the
 selected section (if using) then only the first value is returned. If
 a section is defined more than once only the first is used. The ini
 file can contain comments, which begin with a semicolon (;) or hash
-(#). The user-supplied buffer must be large enough to accomodate the
-longest line in the file.
+(#). 
+
+The user-supplied buffer must be large enough to accomodate the
+longest non-comment line in the file.
 
 Example file format:
 

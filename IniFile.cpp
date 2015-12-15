@@ -2,6 +2,11 @@
 
 #include <string.h>
 
+//for testing in MS VC
+#ifdef _MSC_VER 
+#define strcasecmp _stricmp
+#endif
+
 const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
 
 IniFile::IniFile(const char* filename, uint8_t mode,
@@ -310,6 +315,30 @@ bool IniFile::getMACAddress(const char* section, const char* key,
   return true;
 }
 
+IniFile::error_t IniFile::readUntilNewLine(File &file, char *buffer, size_t len, uint32_t &pos){
+
+	char b;
+
+	//first check to see if a new line already exists in our buffer..
+	for(int i=0; i<len; i++){
+		if(buffer[i]=='\n') return errorNoError;
+		pos++;
+	}
+
+	memset(buffer, 0, len); //we wont be using this..
+	
+	//no newline found in buffer..now we read ahead until we find it..
+	while(1){
+		  size_t bytesRead = file.read(&b, 1);
+		  if (!bytesRead) return errorEndOfFile;
+		  if (b == '\n') return errorNoError; //new line - \r\n format still ok..
+		  pos++;
+		  if (!file.available()) return errorEndOfFile;
+		  
+	}
+
+}
+
 //int8_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_t &pos)
 IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_t &pos)
 {
@@ -329,6 +358,8 @@ IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_
     return errorEndOfFile;
   }
   
+  bool inBody = false;
+  
   for (size_t i = 0; i < bytesRead && i < len-1; ++i) {
     // Test for '\n' with optional '\r' too
     // if (endOfLineTest(buffer, len, i, '\n', '\r')
@@ -346,7 +377,13 @@ IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_
       //return (i+1 == bytesRead && !file.available());
       return errorNoError;
     }
+    
+    //dzzie: if its a comment line, just skip it to avoid errorBufferTooSmall
+	if(!inBody && isCommentChar(buffer[i])) return readUntilNewLine(file, buffer,len, pos);
+	if(!isspace(buffer[i])) inBody = true; 
+	
   }
+  
   if (!file.available()) {
     // end of file without a newline
     buffer[bytesRead] = '\0';
