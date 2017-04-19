@@ -301,7 +301,7 @@ bool IniFile::getMACAddress(const char* section, const char* key,
 	mac[i] += (toupper(*cp) - 55); // convert A to 0xA, F to 0xF
       }
       else {
-	memset(mac, 0, sizeof(mac));
+	memset(mac, 0, 6);
 	return false;
       }
     }
