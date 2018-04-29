@@ -8,7 +8,7 @@
 #define INI_FILE_MAX_FILENAME_LEN 26
 
 #include "SD.h"
-#include "Ethernet.h"
+#include "IPAddress.h"
 
 class IniFileState;
 
