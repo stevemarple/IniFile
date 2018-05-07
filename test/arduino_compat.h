@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 //#include <sys/types.h>
 //#include <sys/stat.h>
 #include <fcntl.h>
@@ -11,9 +12,6 @@
 
 #include <string.h>
 
-typedef unsigned char uint8_t;
-typedef unsigned short uint16_t;
-typedef unsigned long uint32_t;
 typedef bool boolean;
 //#define uint8_t unsigned char
 
