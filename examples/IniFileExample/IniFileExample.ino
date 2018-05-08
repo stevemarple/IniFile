@@ -1,7 +1,7 @@
 #include <SD.h>
 
 #include <SPI.h>
-#include <Ethernet.h>
+#include <IPAddress.h>
 #include <IniFile.h>
 
 // The select pin used for the SD card
