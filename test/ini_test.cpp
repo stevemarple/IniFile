@@ -63,7 +63,7 @@ void testForKey(IniFile &ini, const char *key, const char *section = NULL)
     int e = ini.getError();
     cout << "      Error: " << getErrorMessage(e) << " (" << int(e) << ")"
 	 << endl;
-    if (b == IniFile::errorBufferTooSmall)
+    if (ini.getError() == IniFile::errorBufferTooSmall)
       cout << "Buffer too small for line \"" << buffer << "...\"" << endl;
   }
   else
