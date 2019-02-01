@@ -1,7 +1,6 @@
-IniFile
-=======
+# IniFile
 
-IniFile is an Arduino library for parsing ini files. The format is
+IniFile is an Arduino library for reading ini files. The format is
 similar to that seen in Microsoft `.ini` files but the implementation
 is completely independent. IniFile is designed to use minimal memory
 requirements, and the only buffer used is one supplied by the user,
@@ -22,7 +21,7 @@ file can contain comments, which begin with a semicolon (`;`) or hash
 (`#`). The user-supplied buffer must be large enough to accomodate the
 longest line in the file.
 
-Example file format:
+## Example file format
 
     ; Semi-colon comment
     [network]
@@ -57,3 +56,38 @@ Example file format:
     gateway = 192.168.1.1
     
 
+## Write support
+
+Write support is a feature that has been requested on several
+occasions but as I am no longer using the IniFile library I will not
+add this feature. For anyone planning to add such support the
+information below may be useful.
+
+One goal of the `IniFile` implementation was to limit the amount of
+memory required. For use in embedded systems `malloc` and `new` are
+deliberately not used. Another goal was that tasks which take a longer
+duration were broken down into smaller chunks of work, eg
+`IniFile::getValue(const char* section, const char* key, char* buffer,
+int len, IniFileState &state)`. This was because I wanted my `WwwServer`
+library, which uses `IniFile`, to avoid interfering with time-critical
+code.
+
+I don't think that write support can meet the time-critical goal but
+that doesn't prevent its inclusion. I think the way I would choose to
+implement write support is to use `IniFile::findKey()` to find where the
+desired key is located in the file. I'd then copy everything up to
+that point to a temporary file, insert a line for the value and new
+key, skip the current line in the existing file (using
+`IniFile::readline()`) and then write out the reminder of the existing
+file into the temporary file. I'd like to move or rename the temporary
+file over the existing file but the Arduino SD library doesn't provide
+this functionality; I'd probably just copy the temporary file over the
+old one and then delete the temporary one.
+
+The code has been written under a standard Linux environment, using a
+compatibility header file to mimic the SD library. This was far more
+convenient than doing everything on the Arduino and enabled me to use
+`gdb` to debug the code and core dumps. You'll find `arduino_compat.h`
+inside the test directory, along with a `Makefile` which can be used for
+regression testing. Any proposed changes must pass the regression
+tests.
