@@ -71,6 +71,10 @@ public:
 	// Get an integer value
 	bool getValue(const char* section, const char* key,
 				  char* buffer, size_t len, int& val) const;
+				  
+	// Get a double value
+	bool getValue(const char* section, const char* key,
+				  char* buffer, size_t len, double& val) const;
 
 	// Get a uint16_t value
 	bool getValue(const char* section, const char* key,

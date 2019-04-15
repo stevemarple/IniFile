@@ -144,6 +144,16 @@ bool IniFile::getValue(const char* section, const char* key,
 	return true;
 }
 
+bool IniFile::getValue(const char* section, const char* key,
+					   char* buffer, size_t len, double& val) const
+{
+	if (!getValue(section, key, buffer, len))
+		return false; // error
+
+	val = atof(buffer);
+	return true;
+}
+
 bool IniFile::getValue(const char* section, const char* key,	\
 					   char* buffer, size_t len, uint16_t& val) const
 {
