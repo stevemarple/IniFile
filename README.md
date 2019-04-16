@@ -91,3 +91,9 @@ convenient than doing everything on the Arduino and enabled me to use
 inside the test directory, along with a `Makefile` which can be used for
 regression testing. Any proposed changes must pass the regression
 tests.
+
+## Contributors
+
+  * [Steve Marple](https://github.com/stevemarple)
+  * [per1234](https://github.com/per1234)
+  * [OscarVanL](https://github.com/OscarVanL)
