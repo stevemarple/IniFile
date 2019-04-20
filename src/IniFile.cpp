@@ -41,6 +41,7 @@ bool IniFile::validate(char* buffer, size_t len) const
 bool IniFile::getValue(const char* section, const char* key,
 					   char* buffer, size_t len, IniFileState &state) const
 {
+	char *cp = nullptr;
 	bool done = false;
 	if (!_file) {
 		_error = errorFileNotOpen;
@@ -63,7 +64,6 @@ bool IniFile::getValue(const char* section, const char* key,
 		break;
 
 	case IniFileState::funcFindKey:
-		char *cp;
 		if (findKey(section, key, buffer, len, &cp, state)) {
 			if (_error != errorNoError)
 				return true;
@@ -390,13 +390,16 @@ bool IniFile::isCommentChar(char c)
 char* IniFile::skipWhiteSpace(char* str)
 {
 	char *cp = str;
-	while (isspace(*cp))
-		++cp;
+	if (cp)
+		while (isspace(*cp))
+			++cp;
 	return cp;
 }
 
 void IniFile::removeTrailingWhiteSpace(char* str)
 {
+	if (str == nullptr)
+		return;
 	char *cp = str + strlen(str) - 1;
 	while (cp >= str && isspace(*cp))
 		*cp-- = '\0';
