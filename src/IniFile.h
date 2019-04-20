@@ -2,12 +2,18 @@
 #define _INIFILE_H
 
 #define INIFILE_VERSION "1.1.0"
+//#define PREFER_SDFAT_LIBRARY
 
 // Maximum length for filename, excluding NULL char 26 chars allows an
 // 8.3 filename instead and 8.3 directory with a leading slash
 #define INI_FILE_MAX_FILENAME_LEN 26
 
+#if defined(PREFER_SDFAT_LIBRARY)
+#include "SdFat.h"
+extern SdFat SD;
+#else
 #include "SD.h"
+#endif
 #include "IPAddress.h"
 
 class IniFileState;
@@ -29,8 +35,16 @@ public:
 	static const uint8_t maxFilenameLen;
 
 	// Create an IniFile object. It isn't opened until open() is called on it.
+#if defined(PREFER_SDFAT_LIBRARY)
+	IniFile(const char* filename, oflag_t mode = FILE_READ,
+			bool caseSensitive = false);
+#elif defined(ARDUINO_ARCH_ESP32)
+	IniFile(const char* filename, const char* mode = FILE_READ,
+			bool caseSensitive = false);
+#else
 	IniFile(const char* filename, uint8_t mode = FILE_READ,
 			bool caseSensitive = false);
+#endif
 	~IniFile();
 
 	inline bool open(void); // Returns true if open succeeded
@@ -41,7 +55,13 @@ public:
 	inline error_t getError(void) const;
 	inline void clearError(void) const;
 	// Get the file mode (FILE_READ/FILE_WRITE)
+#if defined(PREFER_SDFAT_LIBRARY)
+	inline oflag_t getMode(void) const;
+#elif defined(ARDUINO_ARCH_ESP32)
+	inline const char* getMode(void) const;
+#else
 	inline uint8_t getMode(void) const;
+#endif
 
 	// Get the filename asscoiated with the ini file object
 	inline const char* getFilename(void) const;
@@ -75,6 +95,10 @@ public:
 	// Get a double value
 	bool getValue(const char* section, const char* key,
 				  char* buffer, size_t len, double& val) const;
+
+	// Get a uint8_t value
+	bool getValue(const char* section, const char* key,
+				  char* buffer, size_t len, uint8_t& val) const;
 
 	// Get a uint16_t value
 	bool getValue(const char* section, const char* key,
@@ -122,7 +146,13 @@ protected:
 
 private:
 	char _filename[INI_FILE_MAX_FILENAME_LEN];
+#if defined(PREFER_SDFAT_LIBRARY)
+	oflag_t _mode;
+#elif defined(ARDUINO_ARCH_ESP32)
+	const char* _mode;
+#else
 	uint8_t _mode;
+#endif
 	mutable error_t _error;
 	mutable File _file;
 	bool _caseSensitive;
@@ -164,7 +194,13 @@ void IniFile::clearError(void) const
 	_error = errorNoError;
 }
 
+#if defined(PREFER_SDFAT_LIBRARY)
+oflag_t IniFile::getMode(void) const
+#elif defined(ARDUINO_ARCH_ESP32)
+const char* IniFile::getMode(void) const
+#else
 uint8_t IniFile::getMode(void) const
+#endif
 {
 	return _mode;
 }

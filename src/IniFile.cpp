@@ -1,11 +1,19 @@
-#include <IniFile.h>
+#include "IniFile.h"
 
 #include <string.h>
 
 const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
 
+#if defined(PREFER_SDFAT_LIBRARY)
+IniFile::IniFile(const char* filename, oflag_t mode,
+				 bool caseSensitive)
+#elif defined(ARDUINO_ARCH_ESP32)
+IniFile::IniFile(const char* filename, const char* mode,
+				 bool caseSensitive)
+#else
 IniFile::IniFile(const char* filename, uint8_t mode,
 				 bool caseSensitive)
+#endif
 {
 	if (strlen(filename) <= maxFilenameLen)
 		strcpy(_filename, filename);
@@ -154,7 +162,17 @@ bool IniFile::getValue(const char* section, const char* key,
 	return true;
 }
 
-bool IniFile::getValue(const char* section, const char* key,	\
+bool IniFile::getValue(const char* section, const char* key,
+					   char* buffer, size_t len, uint8_t& val) const
+{
+	long longval;
+	bool r = getValue(section, key, buffer, len, longval);
+	if (r)
+		val = uint8_t(longval);
+	return r;
+}
+
+bool IniFile::getValue(const char* section, const char* key,
 					   char* buffer, size_t len, uint16_t& val) const
 {
 	long longval;
@@ -332,7 +350,11 @@ IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_
 	if (!file.seek(pos))
 		return errorSeekError;
 
+#if defined(ARDUINO_ARCH_ESP32) && !defined(PREFER_SDFAT_LIBRARY)
+	size_t bytesRead = file.readBytes(buffer, len);
+#else
 	size_t bytesRead = file.read(buffer, len);
+#endif
 	if (!bytesRead) {
 		buffer[0] = '\0';
 		//return 1; // done
@@ -409,8 +431,8 @@ bool IniFile::findSection(const char* section, char* buffer, size_t len,
 	//return (done ? errorSectionNotFound : 0);
 	if (isCommentChar(*cp)) {
 		// return (err == errorEndOfFile ? errorSectionNotFound : errorNoError);
-		if (err == errorSectionNotFound) {
-			_error = err;
+		if (err == errorEndOfFile) {
+			_error = errorSectionNotFound;
 			return true;
 		}
 		else
