@@ -1,10 +1,10 @@
-#include <IniFile.h>
+#include "IniFile.h"
 
 #include <string.h>
 
 const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
 
-IniFile::IniFile(const char* filename, uint8_t mode,
+IniFile::IniFile(const char* filename, mode_t mode,
 				 bool caseSensitive)
 {
 	if (strlen(filename) <= maxFilenameLen)
@@ -342,7 +342,11 @@ IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_
 	if (!file.seek(pos))
 		return errorSeekError;
 
+#if defined(ARDUINO_ARCH_ESP32) && !defined(PREFER_SDFAT_LIBRARY)
+	size_t bytesRead = file.readBytes(buffer, len);
+#else
 	size_t bytesRead = file.read(buffer, len);
+#endif
 	if (!bytesRead) {
 		buffer[0] = '\0';
 		//return 1; // done

@@ -7,13 +7,26 @@
 // 8.3 filename instead and 8.3 directory with a leading slash
 #define INI_FILE_MAX_FILENAME_LEN 26
 
+#if defined(PREFER_SDFAT_LIBRARY)
+#include "SdFat.h"
+extern SdFat SD;
+#else
 #include "SD.h"
+#endif
 #include "IPAddress.h"
 
 class IniFileState;
 
 class IniFile {
 public:
+#if defined(PREFER_SDFAT_LIBRARY)
+	typedef oflag_t mode_t;
+#elif defined(ARDUINO_ARCH_ESP32)
+	typedef const char* mode_t;
+#else
+	typedef uint8_t mode_t;
+#endif
+
 	enum error_t {
 		errorNoError = 0,
 		errorFileNotFound,
@@ -29,7 +42,7 @@ public:
 	static const uint8_t maxFilenameLen;
 
 	// Create an IniFile object. It isn't opened until open() is called on it.
-	IniFile(const char* filename, uint8_t mode = FILE_READ,
+	IniFile(const char* filename, mode_t mode = FILE_READ,
 			bool caseSensitive = false);
 	~IniFile();
 
@@ -41,7 +54,7 @@ public:
 	inline error_t getError(void) const;
 	inline void clearError(void) const;
 	// Get the file mode (FILE_READ/FILE_WRITE)
-	inline uint8_t getMode(void) const;
+	inline mode_t getMode(void) const;
 
 	// Get the filename asscoiated with the ini file object
 	inline const char* getFilename(void) const;
@@ -126,7 +139,7 @@ protected:
 
 private:
 	char _filename[INI_FILE_MAX_FILENAME_LEN];
-	uint8_t _mode;
+	mode_t _mode;
 	mutable error_t _error;
 	mutable File _file;
 	bool _caseSensitive;
@@ -168,7 +181,7 @@ void IniFile::clearError(void) const
 	_error = errorNoError;
 }
 
-uint8_t IniFile::getMode(void) const
+IniFile::mode_t IniFile::getMode(void) const
 {
 	return _mode;
 }
