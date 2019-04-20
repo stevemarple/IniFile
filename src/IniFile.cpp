@@ -154,7 +154,17 @@ bool IniFile::getValue(const char* section, const char* key,
 	return true;
 }
 
-bool IniFile::getValue(const char* section, const char* key,	\
+bool IniFile::getValue(const char* section, const char* key,
+					   char* buffer, size_t len, uint8_t& val) const
+{
+	long longval;
+	bool r = getValue(section, key, buffer, len, longval);
+	if (r)
+		val = uint8_t(longval);
+	return r;
+}
+
+bool IniFile::getValue(const char* section, const char* key,
 					   char* buffer, size_t len, uint16_t& val) const
 {
 	long longval;
