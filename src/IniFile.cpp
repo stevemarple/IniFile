@@ -426,8 +426,8 @@ bool IniFile::findSection(const char* section, char* buffer, size_t len,
 	//return (done ? errorSectionNotFound : 0);
 	if (isCommentChar(*cp)) {
 		// return (err == errorEndOfFile ? errorSectionNotFound : errorNoError);
-		if (err == errorSectionNotFound) {
-			_error = err;
+		if (err == errorSectionNotFound || err == errorEndOfFile) {
+			_error = errorSectionNotFound;
 			return true;
 		}
 		else
