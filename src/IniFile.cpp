@@ -4,16 +4,8 @@
 
 const uint8_t IniFile::maxFilenameLen = INI_FILE_MAX_FILENAME_LEN;
 
-#if defined(PREFER_SDFAT_LIBRARY)
-IniFile::IniFile(const char* filename, oflag_t mode,
+IniFile::IniFile(const char* filename, mode_t mode,
 				 bool caseSensitive)
-#elif defined(ARDUINO_ARCH_ESP32)
-IniFile::IniFile(const char* filename, const char* mode,
-				 bool caseSensitive)
-#else
-IniFile::IniFile(const char* filename, uint8_t mode,
-				 bool caseSensitive)
-#endif
 {
 	if (strlen(filename) <= maxFilenameLen)
 		strcpy(_filename, filename);
