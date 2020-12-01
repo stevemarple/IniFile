@@ -5,14 +5,14 @@ CXXFLAGS += -ggdb -Wall -I.
 default: ini_test
 
 .PHONY : IniFile.h
-IniFile.h : ../src/IniFile.h
+IniFile.h : ../../src/IniFile.h
 	echo '' > $@
 	echo '#include "arduino_compat.h"' >> $@
 	echo '#include <iostream>' >> $@
 	echo 'using namespace ::std;' >> $@
 	cat $< >> $@
 
-IniFile.cpp : ../src/IniFile.cpp
+IniFile.cpp : ../../src/IniFile.cpp
 	cp $< $@
 
 IniFile.o : IniFile.cpp IniFile.h
