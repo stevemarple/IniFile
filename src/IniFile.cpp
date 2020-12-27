@@ -330,6 +330,47 @@ bool IniFile::getMACAddress(const char* section, const char* key,
 	return true;
 }
 
+// From the file location saved in 'state' look for the next section and read its name.
+// The name will be in the buffer. Returns false if no section found. 
+bool IniFile::browseSections(char* buffer, size_t len, IniFileState &state) const
+{
+	error_t err = errorNoError;
+	
+	do {
+		err = IniFile::readLine(_file, buffer, len, state.readLinePosition);
+		
+		if (err != errorNoError) {
+			// end of file or other error
+			_error = err;
+			return false;
+		} else { 
+			char *cp = skipWhiteSpace(buffer);
+
+			if (*cp == '[') {
+				// Found a section, read the name
+				++cp;
+				cp = skipWhiteSpace(cp);
+				char *ep = strchr(cp, ']');
+				if (ep != NULL) {
+					*ep = '\0'; // make ] be end of string
+					removeTrailingWhiteSpace(cp);
+					// Copy from cp to buffer, but the strings overlap so strcpy is out
+					while (*cp != '\0')
+						*buffer++ = *cp++;
+					*buffer = '\0';
+					_error = errorNoError;
+					return true;
+				}
+			}
+		}
+		// continue searching
+	} while (err == errorNoError);
+	
+	// we should never get here...
+	_error = err;
+	return false;
+}
+
 //int8_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_t &pos)
 IniFile::error_t IniFile::readLine(File &file, char *buffer, size_t len, uint32_t &pos)
 {
