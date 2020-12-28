@@ -2,7 +2,7 @@ DIFF = diff
 RM = rm -f
 CXXFLAGS += -ggdb -Wall -I.
 
-default: ini_test
+default: regressiontest
 
 .PHONY : IniFile.h
 IniFile.h : ../../src/IniFile.h
@@ -42,14 +42,14 @@ regressiontest :
 	@echo TEST PASSED
 
 .PHONY : clean
-clean : 
+clean :
 	-$(RM) *.o IniFile.h IniFile.cpp ini_test.regressiontest.tmp
 
 .PHONY : realclean
 realclean : clean
 	-$(RM) -f ini_test
 
-readtest : readtest.o File.o IniFile.o IPAddress.o 
+readtest : readtest.o File.o IniFile.o IPAddress.o
 	$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
 
 readtest.o : readtest.cpp IniFile.h
