@@ -123,7 +123,7 @@ public:
 					   
 	// From the file location saved in 'state' look for the next section and read its name.
 	// The name will be in the buffer. Returns false if no section found. 
-	bool IniFile::browseSections(char* buffer, size_t len, IniFileState &state) const;
+	bool browseSections(char* buffer, size_t len, IniFileState &state) const;
 
 	// Utility function to read a line from a file, make available to all
 	//static int8_t readLine(File &file, char *buffer, size_t len, uint32_t &pos);
