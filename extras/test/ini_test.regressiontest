@@ -60,4 +60,10 @@ Using file test.ini
       Value of pi is "3.141592653589793"
     Pi: 3.14159
 ----
+Using file browsetest.ini
+  File open? true
+Karen eats burger, drinks beer, and has chocolate for dessert.
+Peter eats falafel, drinks tea without milk, and has vegan icecream for dessert.
+Noel eats sushi, drinks water, and has no dessert.
+Jessica eats sandwich, drinks nothing, and has muffin for dessert.
 Done

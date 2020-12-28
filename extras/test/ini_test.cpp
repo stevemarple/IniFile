@@ -39,7 +39,7 @@ const char* getErrorMessage(int e)
     cp = sectionNotFound;
     break;
   case IniFile::errorKeyNotFound:
-    cp = keyNotFound; 
+    cp = keyNotFound;
     break;
   default:
     cp = unknownErrorValue;
@@ -104,10 +104,43 @@ void runTest(IniFile &ini)
 	 << endl;
   }
   cout << "----" << endl;
-  
+
 
 }
 
+// Test the browseSections code contributed by kaixxx. This is based on the
+// IniBrowseExample.ino by kaixxx but adapted to work under a standard C++
+// environment.
+void browseTest(IniFile &ini)
+{
+  cout << "Using file " << ini.getFilename() << endl;
+  cout << "  File open? " << (ini.isOpen() ? "true" : "false") << endl;
+
+  const int bufferLen = 100;
+  char buffer[bufferLen];
+  IniFileState state;
+  char sectName[bufferLen];
+
+  while (ini.browseSections(sectName, bufferLen, state)) {
+    cout << sectName;
+
+    if (ini.getValue(sectName, "meal", buffer, bufferLen)) {
+      cout << " eats " << buffer;
+    } else
+      cout << " eats nothing";
+
+    if (ini.getValue(sectName, "drinks", buffer, bufferLen)) {
+      cout << ", drinks " << buffer;
+    } else
+      cout << ", drinks nothing";
+
+    if (ini.getValue(sectName, "dessert", buffer, bufferLen)) {
+      cout << ", and has " << buffer << " for dessert." << endl;
+    } else
+      cout << ", and has no dessert." << endl;
+  }
+
+}
 
 int main(void)
 {
@@ -117,18 +150,22 @@ int main(void)
   // SD.open() isn't const char*.
   char missingIniFilename[] = "missing.ini";
   char testIniFilename[] = "test.ini";
+  char browseTestIniFilename[] = "browsetest.ini";
 
   // Try the construtor which opens a file
   IniFile missingIni(missingIniFilename);
   IniFile testIni(testIniFilename);
- 
+  IniFile browseTestIni(browseTestIniFilename);
+
   cout << "*** Testing IniFile(char*) ***" << endl;
   missingIni.open();
   runTest(missingIni);
   testIni.open();
   runTest(testIni);
+  browseTestIni.open();
+  browseTest(browseTestIni);
   cout << "Done" << endl;
-  
+
 }
 
 
