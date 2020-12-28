@@ -11,7 +11,7 @@ extern SdFat SD;
 #endif
 #include "IPAddress.h"
 
-#define INIFILE_VERSION "1.2.3"
+#define INIFILE_VERSION "1.3.0"
 
 // Maximum length for filename, excluding NULL char 26 chars allows an
 // 8.3 filename instead and 8.3 directory with a leading slash
