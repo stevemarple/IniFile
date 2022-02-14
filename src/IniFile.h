@@ -4,10 +4,14 @@
 #include <stdint.h>
 
 #if defined(PREFER_SDFAT_LIBRARY)
-#include "SdFat.h"
-extern SdFat SD;
+	#include "SdFat.h"
+	#if defined(PREFER_FAT_FILE_SYSTEM)
+	extern FatFileSystem fatfs;
+	#else
+	extern SdFat SD;
+	#endif
 #else
-#include "SD.h"
+	#include "SD.h"
 #endif
 #include "IPAddress.h"
 
@@ -155,7 +159,11 @@ bool IniFile::open(void)
 {
 	if (_file)
 		_file.close();
+#if defined(PREFER_FAT_FILE_SYSTEM)
+	_file = fatfs.open(_filename, _mode);
+#else
 	_file = SD.open(_filename, _mode);
+#endif
 	if (isOpen()) {
 		_error = errorNoError;
 		return true;
